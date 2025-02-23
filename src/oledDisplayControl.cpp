@@ -84,14 +84,23 @@ void beanAnimationFrame8(){
 
 void displayControl::displayLoadUpConnections(){
     beanAnimationFrame8();
-    display.setCursor(0,50);
+    display.setCursor(displayControl::centerDisplayText(displayControl::DISPLAY_WIDTH, "--Title--"),50);
     display.setTextSize(1);
     display.setTextColor(WHITE);
     display.println("--Title--");
     display.display();
 
-    //hier immer display.cleardisplay und bild neuzeigen
-    //und alle sachen loaden
 
 
+}
+
+int displayControl::centerDisplayText(int width, const char text[]){
+
+    // zu ueberartbeiten
+    int displayCenter = width;
+    int textCenter = strlen(text);
+    int textCenterPosition = (displayCenter - textCenter)/2;
+    Serial.println(textCenterPosition);
+
+    return textCenterPosition;
 }
