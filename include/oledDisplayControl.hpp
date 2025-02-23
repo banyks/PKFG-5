@@ -9,6 +9,8 @@ class displayControl{
         static void displayStartup();
         static void displayStartupAnimation();
         static void displayLoadUpConnections();
-        static int centerDisplayText(int width, const char text[]);
-
+        static int displayText(int width, const char text[]);
+        static void loadMqtt();
+        static void loadWifi();
+        
 };

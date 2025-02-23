@@ -84,23 +84,36 @@ void beanAnimationFrame8(){
 
 void displayControl::displayLoadUpConnections(){
     beanAnimationFrame8();
-    display.setCursor(displayControl::centerDisplayText(displayControl::DISPLAY_WIDTH, "--Title--"),50);
-    display.setTextSize(1);
-    display.setTextColor(WHITE);
-    display.println("--Title--");
-    display.display();
+    displayControl::displayText(displayControl::DISPLAY_WIDTH, "TESTTEST");
+    delay(1000);
+
 
 
 
 }
 
-int displayControl::centerDisplayText(int width, const char text[]){
-
+int displayControl::displayText(int width, const char text[]){
+    
     // zu ueberartbeiten
     int displayCenter = width;
     int textCenter = strlen(text);
     int textCenterPosition = (displayCenter - textCenter)/2;
-    Serial.println(textCenterPosition);
+    Serial.println(textCenterPosition);         //----------------- TO REMOVE ----------------- 
+
+    display.setCursor(textCenterPosition,50);
+    display.setTextSize(1);
+    display.setTextColor(WHITE);
+    display.println(text);
+    display.display();
 
     return textCenterPosition;
+}
+
+void displayControl::loadMqtt(){
+
+
+}
+void displayControl::loadWifi(){
+
+
 }
