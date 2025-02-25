@@ -1,5 +1,6 @@
 #include "oledDisplayControl.hpp"
 #include "oledDisplayPresets.hpp"
+#include "mqttControl.hpp"
 
 #include <Arduino.h>
 #include <Adafruit_SSD1306.h>
@@ -84,22 +85,44 @@ void beanAnimationFrame8(){
 
 void displayControl::displayLoadUpConnections(){
     beanAnimationFrame8();
-    displayControl::displayText(displayControl::DISPLAY_WIDTH, "TESTTEST");
+    displayControl::displayText("TESTTEST");
     delay(1000);
 
+    displayControl::displayText("WIFI connectieren");
+    if (mqttControl::wifiConnect()){
+        displayControl::displayText("WIFI connectiert..");
+        delay(1000);
+    }
+    else if(!mqttControl::wifiConnect()){
+        displayControl::displayText("WIFI fehlerhaft..");
+        delay(1000);
 
+    }
+    
+    
+
+    displayControl::displayText("MQTT connectieren");
+    if (mqttControl::mqttConnect()){
+        displayControl::displayText("MQTT connectiert..");
+        delay(1000);
+    }
+    else if(!mqttControl::mqttConnect()){
+        displayControl::displayText("MQTT fehlerhaft..");
+        delay(1000);
+
+    }
 
 
 }
 
-int displayControl::displayText(int width, const char text[]){
+int displayControl::displayText(const char* text){
     
     // zu ueberartbeiten
-    int displayCenter = width;
-    int textCenter = strlen(text);
-    int textCenterPosition = (displayCenter - textCenter)/2;
-    Serial.println(textCenterPosition);         //----------------- TO REMOVE ----------------- 
+    int textlenght = strlen(text);
+    int textCenterPosition = (displayControl::DISPLAY_WIDTH - textlenght)/2;
+    //Serial.println(textCenterPosition);         //----------------- TO REMOVE ----------------- 
 
+    beanAnimationFrame8();
     display.setCursor(textCenterPosition,50);
     display.setTextSize(1);
     display.setTextColor(WHITE);
@@ -109,11 +132,3 @@ int displayControl::displayText(int width, const char text[]){
     return textCenterPosition;
 }
 
-void displayControl::loadMqtt(){
-
-
-}
-void displayControl::loadWifi(){
-
-
-}
