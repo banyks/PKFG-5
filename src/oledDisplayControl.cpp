@@ -72,8 +72,6 @@ void displayControl::displayStartupAnimation() {
     display.display();
     delay(animationTime);
     
-    displayControl::displayLoadUpConnections();
-    
 }
 
 void beanAnimationFrame8(){
@@ -85,11 +83,11 @@ void beanAnimationFrame8(){
 
 void displayControl::displayLoadUpConnections(){
     beanAnimationFrame8();
-    displayControl::displayText("TESTTEST");
+    displayControl::displayText("- GRUPPE 5 -");
     delay(1000);
 
     displayControl::displayText("WIFI connectieren");
-    if (mqttControl::wifiConnect()){
+    if (true/*mqttControl::wifiConnect()*/){            //----------------- TO REMOVE (comment and true) -----------------
         displayControl::displayText("WIFI connectiert..");
         delay(1000);
     }
@@ -102,7 +100,7 @@ void displayControl::displayLoadUpConnections(){
     
 
     displayControl::displayText("MQTT connectieren");
-    if (mqttControl::mqttConnect()){
+    if (true/*mqttControl::mqttConnect()*/){            //----------------- TO REMOVE (comment and true) -----------------
         displayControl::displayText("MQTT connectiert..");
         delay(1000);
     }
@@ -112,7 +110,6 @@ void displayControl::displayLoadUpConnections(){
 
     }
 
-
 }
 
 int displayControl::displayText(const char* text){
@@ -120,7 +117,7 @@ int displayControl::displayText(const char* text){
     // zu ueberartbeiten
     int textlenght = strlen(text);
     int textCenterPosition = (displayControl::DISPLAY_WIDTH - textlenght)/2;
-    //Serial.println(textCenterPosition);         //----------------- TO REMOVE ----------------- 
+    //Serial.println(textCenterPosition);         //----------------- TO REMOVE (comment) ----------------- 
 
     beanAnimationFrame8();
     display.setCursor(textCenterPosition,50);

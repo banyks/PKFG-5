@@ -38,7 +38,7 @@ void setup() {
   //displayControl display;
 
   displayControl::displayStartup();
-
+  displayControl::displayLoadUpConnections();
 
 }
 
