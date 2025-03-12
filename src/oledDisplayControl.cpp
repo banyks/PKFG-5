@@ -6,10 +6,10 @@
 #include <Adafruit_SSD1306.h>
 #include <Wire.h>
 
-const char displayControl::DISPLAY_WIDTH = 128;
+const char displayControl::DISPLAY_WIDTH =  128;
 const char displayControl::DISPLAY_HEIGHT = 64;
-const char displayControl::RESET_PIN = -1;
-const int animationTime = 50;
+const char displayControl::RESET_PIN =      -1;
+const unsigned int animationTime = 50;
 
 Adafruit_SSD1306 display(displayControl::DISPLAY_WIDTH, displayControl::DISPLAY_HEIGHT, &Wire, displayControl::RESET_PIN);
 
