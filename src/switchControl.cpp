@@ -29,6 +29,7 @@ bool switchControl::switchValue(int switchToRead){
             return digitalRead(switchControl::SWITCH4);
             break;
         default:
+            Serial.println("SWITCHCONTROL: Unknown switch");
             return false;
             break;
     }

@@ -13,6 +13,11 @@ const int motorControl::MOTOR2_IN4 = 4;
 const int motorControl::POTENTIOMETER1 = 32;
 const int motorControl::VCC = 23;
 
+const int pwmChannel1 = 0; // motor 1
+const int pwmChannel2 = 1; // motor 2
+const int pwmFrequency = 10000;
+const int pwmResolution = 8;
+
 void motorControl::motorSetup(){
     pinMode(motorControl::MOTOR1_ENA, OUTPUT);
     pinMode(motorControl::MOTOR1_IN1, OUTPUT);
@@ -26,17 +31,102 @@ void motorControl::motorSetup(){
     pinMode(motorControl::VCC, OUTPUT);
 
     digitalWrite(motorControl::VCC, 1);
+
+    ledcSetup(pwmChannel1, pwmFrequency, pwmResolution);
+    ledcSetup(pwmChannel2, pwmFrequency, pwmResolution);
+    ledcAttachPin(motorControl::MOTOR1_ENA, pwmChannel1);
+    ledcAttachPin(motorControl::MOTOR2_ENB, pwmChannel2);
 }
 
-void motorControl::run(int motor, const char* direction, unsigned int speed){
+bool motorControl::motorRun(int motor, const char* direction, unsigned int pwmSpeed, unsigned int motorSpeed){
+    switch(motor){
+        case 1:
+            if (direction == "clockwise" ){
+                digitalWrite(motorControl::MOTOR1_IN1, 1);
+                digitalWrite(motorControl::MOTOR1_IN2, 0);
 
+                for(int i=0; i<=motorSpeed; i++){
+                    ledcWrite(pwmChannel1, i);
+                    delay(pwmSpeed);
+                }
+                return true;
+            }
+            if (direction == "counterclockwise"){
+                digitalWrite(motorControl::MOTOR1_IN1, 0);
+                digitalWrite(motorControl::MOTOR1_IN2, 1);
 
-    //----
+                for(int i=0; i<=motorSpeed; i++){
+                    ledcWrite(pwmChannel1, i);
+                    delay(pwmSpeed);
+                }
+                return true;
+            }
+            break;
+        case 2:
+            if (direction == "clockwise" ){
+                digitalWrite(motorControl::MOTOR2_IN3, 1);
+                digitalWrite(motorControl::MOTOR2_IN4, 0);
+
+                for(int i=0; i<=motorSpeed; i++){
+                    ledcWrite(pwmChannel2, i);
+                    delay(pwmSpeed);
+                }
+                return true;
+            }
+            if (direction == "counterclockwise"){
+                digitalWrite(motorControl::MOTOR2_IN3, 0);
+                digitalWrite(motorControl::MOTOR2_IN4, 1);
+
+                for(int i=0; i<=motorSpeed; i++){
+                    ledcWrite(pwmChannel2, i);
+                    delay(pwmSpeed);
+                }
+                return true;
+            }
+            break;
+        default:
+            Serial.println("MOTORCONTROL: Unknown motor");
+            return false;
+            break;
+}
 
 
 }
 
-void motorControl::stop(int motor, unsigned int speed){
+bool motorControl::motorStop(int motor, bool err, unsigned int pwmSpeed, unsigned int motorSpeed){
+    if (err && motor == 3){
+        digitalWrite(motorControl::MOTOR1_IN1, 0);
+        digitalWrite(motorControl::MOTOR1_IN2, 0);
+        digitalWrite(motorControl::MOTOR2_IN3, 0);
+        digitalWrite(motorControl::MOTOR2_IN4, 0);
+        digitalWrite(pwmChannel1, 0);
+        digitalWrite(pwmChannel2, 0);
+        return true;
 
+    }
+
+    switch (motor){
+        case 1:
+            for(int i=motorSpeed; i>=1; i--){
+                ledcWrite(pwmChannel1, i);
+                delay(pwmSpeed);
+            }
+            digitalWrite(motorControl::MOTOR1_ENA, 0);
+            return true;
+            break;
+        case 2:
+            for(int i=motorSpeed; i>=1; i--){
+                ledcWrite(pwmChannel2, i);
+                delay(pwmSpeed);
+            }
+            digitalWrite(motorControl::MOTOR2_ENB, 0);
+            return true;
+            break;
+        default:
+            Serial.println("MOTORCONTROL: Unknown motor");
+            return false;
+            break;
+
+    }
 
 }

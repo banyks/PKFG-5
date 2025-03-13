@@ -14,8 +14,8 @@ class motorControl{
         static const int VCC;
 
         static void motorSetup();
-        static void run(int motor, const char* direction, unsigned int speed);
-        static void stop(int motor, unsigned int speed);
+        static bool motorRun(int motor, const char* direction, unsigned int pwmSpeed, unsigned int motorSpeed);
+        static bool motorStop(int motor, bool err, unsigned int pwmSpeed, unsigned int motorSpeed);
 
 
 
