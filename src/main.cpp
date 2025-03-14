@@ -34,6 +34,10 @@
 #include "ledControl.hpp"
 #include "switchControl.hpp"  
 
+bool placeholder1; // start
+bool placeholder2; // sensor 1
+bool placeholder3; // sensor 24
+
 void setup() {
   Serial.begin(115200);
   motorControl::motorSetup();
