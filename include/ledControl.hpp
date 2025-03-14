@@ -6,7 +6,7 @@ class ledControl{
         static const int LED_YELLOW;
         static const int LED_GREEN;
         
-        static void ledStartup();
+        static void ledSetup();
         static void ledOn(const char* led, unsigned int  fade);
         static void ledOff(const char* led, unsigned int fade);
 

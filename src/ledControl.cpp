@@ -2,14 +2,27 @@
 
 #include <Arduino.h>
 
-const int LED_RED =     12;
-const int LED_YELLOW =  14;
-const int LED_GREEN =   27;
+const int ledControl::LED_RED =     12;
+const int ledControl::LED_YELLOW =  14;
+const int ledControl::LED_GREEN =   27;
 
-void ledControl::ledStartup(){
+const int pwmChannel3 = 2;
+const int pwmChannel4 = 3;
+const int pwmChannel5 = 4;
+const int pwmFrequency = 5000;
+const int pwmResolution = 8;
+
+void ledControl::ledSetup(){
     pinMode(ledControl::LED_RED,    OUTPUT);
     pinMode(ledControl::LED_YELLOW, OUTPUT);
     pinMode(ledControl::LED_GREEN,  OUTPUT);
+
+    ledcSetup(pwmChannel3, pwmFrequency, pwmResolution);
+    ledcSetup(pwmChannel4, pwmFrequency, pwmResolution);
+    ledcSetup(pwmChannel5, pwmFrequency, pwmResolution);
+    ledcAttachPin(ledControl::LED_RED, pwmChannel3);
+    ledcAttachPin(ledControl::LED_YELLOW, pwmChannel4);
+    ledcAttachPin(ledControl::LED_GREEN, pwmChannel5);
 
 }
 
@@ -18,36 +31,36 @@ void ledControl::ledOn(const char* led, unsigned int fade){
 
     // normal state (on)
     if (led == "red" && fade == 0){
-        digitalWrite(ledControl::LED_RED, 1);
+        ledcWrite(pwmChannel3, 1);
 
     }
     if (led == "yellow" && fade == 0){
-        digitalWrite(ledControl::LED_YELLOW, 1);
+        ledcWrite(ledControl::LED_YELLOW, 1);
 
     }
     if (led == "green" && fade == 0){
-        digitalWrite(ledControl::LED_GREEN, 1);
+        ledcWrite(pwmChannel3, 1);
 
     }
     
     // special state (on fade)
     if (led == "red" && !fade == 0){
         for(int i=0; i<=255; i++){
-            analogWrite(ledControl::LED_RED, i);
+            ledcWrite(pwmChannel3, i);
             delay(fade);
         }
 
     }
     if (led == "yellow" && !fade == 0){
         for(int i=0; i<=255; i++){
-            analogWrite(ledControl::LED_YELLOW, i);
+            ledcWrite(pwmChannel3, i);
             delay(fade);
         }
 
     }
     if (led == "green" && !fade == 0){
         for(int i=0; i<=255; i++){
-            analogWrite(ledControl::LED_GREEN, i);
+            ledcWrite(pwmChannel3, i);
             delay(fade);
         }
 
@@ -63,36 +76,36 @@ void ledControl::ledOff(const char* led, unsigned int fade){
 
     // normal state (off)
     if (led == "red" && fade == 0){
-        digitalWrite(ledControl::LED_RED, 0);
+        ledcWrite(pwmChannel3, 0);
 
     }
     if (led == "yellow" && fade == 0){
-        digitalWrite(ledControl::LED_YELLOW, 0);
+        ledcWrite(pwmChannel3, 0);
 
     }
     if (led == "green" && fade == 0){
-        digitalWrite(ledControl::LED_GREEN, 0);
+        ledcWrite(pwmChannel3, 0);
 
     }
     
     // special state (off fade)
     if (led == "red" && !fade == 0){
         for(int i=255; i>=0; i--){
-            analogWrite(ledControl::LED_RED, i);
+            ledcWrite(pwmChannel3, i);
             delay(fade);
         }
 
     }
     if (led == "yellow" && !fade == 0){
         for(int i=255; i>=0; i--){
-            analogWrite(ledControl::LED_YELLOW, i);
+            ledcWrite(pwmChannel3, i);
             delay(fade);
         }
 
     }
     if (led == "green" && !fade == 0){
         for(int i=255; i>=0; i--){
-            analogWrite(ledControl::LED_GREEN, i);
+            ledcWrite(pwmChannel3, i);
             delay(fade);
         }
 
