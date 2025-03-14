@@ -9,7 +9,7 @@ const int ledControl::LED_GREEN =   27;
 const int pwmChannel3 = 2;
 const int pwmChannel4 = 3;
 const int pwmChannel5 = 4;
-const int pwmFrequency = 5000;
+const int pwmFrequency = 10000;
 const int pwmResolution = 8;
 
 void ledControl::ledSetup(){
@@ -31,36 +31,36 @@ void ledControl::ledOn(const char* led, unsigned int fade){
 
     // normal state (on)
     if (led == "red" && fade == 0){
-        ledcWrite(pwmChannel3, 1);
+        digitalWrite(ledControl::LED_RED, 1);
 
     }
     if (led == "yellow" && fade == 0){
-        ledcWrite(ledControl::LED_YELLOW, 1);
+        digitalWrite(ledControl::LED_YELLOW, 1);
 
     }
     if (led == "green" && fade == 0){
-        ledcWrite(pwmChannel3, 1);
+        digitalWrite(ledControl::LED_GREEN, 1);
 
     }
     
     // special state (on fade)
-    if (led == "red" && !fade == 0){
+    if (led == "red" && fade != 0){
         for(int i=0; i<=255; i++){
             ledcWrite(pwmChannel3, i);
             delay(fade);
         }
 
     }
-    if (led == "yellow" && !fade == 0){
+    if (led == "yellow" && fade != 0){
         for(int i=0; i<=255; i++){
-            ledcWrite(pwmChannel3, i);
+            ledcWrite(pwmChannel4, i);
             delay(fade);
         }
 
     }
-    if (led == "green" && !fade == 0){
+    if (led == "green" && fade != 0){
         for(int i=0; i<=255; i++){
-            ledcWrite(pwmChannel3, i);
+            ledcWrite(pwmChannel5, i);
             delay(fade);
         }
 
@@ -76,36 +76,36 @@ void ledControl::ledOff(const char* led, unsigned int fade){
 
     // normal state (off)
     if (led == "red" && fade == 0){
-        ledcWrite(pwmChannel3, 0);
+        digitalWrite(ledControl::LED_RED, 0);
 
     }
     if (led == "yellow" && fade == 0){
-        ledcWrite(pwmChannel3, 0);
+        digitalWrite(ledControl::LED_YELLOW, 0);
 
     }
     if (led == "green" && fade == 0){
-        ledcWrite(pwmChannel3, 0);
+        digitalWrite(ledControl::LED_GREEN, 0);
 
     }
     
     // special state (off fade)
-    if (led == "red" && !fade == 0){
+    if (led == "red" && fade != 0){
         for(int i=255; i>=0; i--){
             ledcWrite(pwmChannel3, i);
             delay(fade);
         }
 
     }
-    if (led == "yellow" && !fade == 0){
+    if (led == "yellow" && fade != 0){
         for(int i=255; i>=0; i--){
-            ledcWrite(pwmChannel3, i);
+            ledcWrite(pwmChannel4, i);
             delay(fade);
         }
 
     }
-    if (led == "green" && !fade == 0){
+    if (led == "green" && fade != 0){
         for(int i=255; i>=0; i--){
-            ledcWrite(pwmChannel3, i);
+            ledcWrite(pwmChannel5, i);
             delay(fade);
         }
 

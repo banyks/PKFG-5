@@ -6,7 +6,7 @@ const int switchControl::SWITCH2 = 39;
 const int switchControl::SWITCH3 = 34;
 const int switchControl::SWITCH4 = 35;
 
-void switchSetup(){
+void switchControl::switchSetup(){
     pinMode(switchControl::SWITCH1, INPUT);
     pinMode(switchControl::SWITCH2, INPUT);
     pinMode(switchControl::SWITCH3, INPUT);
@@ -16,16 +16,16 @@ void switchSetup(){
 
 bool switchControl::switchValue(int switchToRead){
     switch (switchToRead){
-        case 36:
+        case 1:
             return digitalRead(switchControl::SWITCH1);
             break;
-        case 39:
+        case 2:
             return digitalRead(switchControl::SWITCH2);
             break;
-        case 34:
+        case 3:
             return digitalRead(switchControl::SWITCH3);
             break;
-        case 35:
+        case 4:
             return digitalRead(switchControl::SWITCH4);
             break;
         default:

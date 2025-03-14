@@ -41,7 +41,13 @@ void motorControl::motorSetup(){
 bool motorControl::motorRun(int motor, const char* direction, unsigned int pwmSpeed, unsigned int motorSpeed){
     switch(motor){
         case 1:
-            if (direction == "clockwise" ){
+            if (direction == "clockwise" && pwmSpeed == 0){
+                digitalWrite(motorControl::MOTOR1_IN1, 1);
+                digitalWrite(motorControl::MOTOR1_IN2, 0);
+                ledcWrite(pwmChannel1, motorSpeed);
+                return true;
+            }
+            if (direction == "clockwise" && pwmSpeed != 0){
                 digitalWrite(motorControl::MOTOR1_IN1, 1);
                 digitalWrite(motorControl::MOTOR1_IN2, 0);
 
@@ -51,7 +57,13 @@ bool motorControl::motorRun(int motor, const char* direction, unsigned int pwmSp
                 }
                 return true;
             }
-            if (direction == "counterclockwise"){
+            if (direction == "counterclockwise" && pwmSpeed == 0){
+                digitalWrite(motorControl::MOTOR1_IN1, 0);
+                digitalWrite(motorControl::MOTOR1_IN2, 1);
+                ledcWrite(pwmChannel1, motorSpeed);
+                return true;
+            }
+            if (direction == "counterclockwise" && pwmSpeed != 0){
                 digitalWrite(motorControl::MOTOR1_IN1, 0);
                 digitalWrite(motorControl::MOTOR1_IN2, 1);
 
@@ -62,6 +74,7 @@ bool motorControl::motorRun(int motor, const char* direction, unsigned int pwmSp
                 return true;
             }
             break;
+            
         case 2:
             if (direction == "clockwise" ){
                 digitalWrite(motorControl::MOTOR2_IN3, 1);
@@ -88,9 +101,7 @@ bool motorControl::motorRun(int motor, const char* direction, unsigned int pwmSp
             Serial.println("MOTORCONTROL: Unknown motor");
             return false;
             break;
-}
-
-
+    }
 }
 
 bool motorControl::motorStop(int motor, bool err, unsigned int pwmSpeed, unsigned int motorSpeed){
