@@ -40,11 +40,6 @@ void setup() {
   ledControl::ledSetup();
   switchControl::switchSetup();
 
-  Serial.println("leds on");
-  
-  //ledControl::ledOn("red", 1);
-  //ledControl::ledOn("yellow", 1);
-  //ledControl::ledOn("green", 1);
   delay(100);
 
   //displayControl::displayStartup();
