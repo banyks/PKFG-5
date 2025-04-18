@@ -39,6 +39,8 @@ void setup() {
   motorControl::motorSetup();
   ledControl::ledSetup();
   switchControl::switchSetup();
+  mqttControl::wifiConnect();
+  mqttControl::mqttConnect();
 
   delay(100);
 
@@ -50,23 +52,15 @@ void setup() {
 // if fist detected alone, motor stops shortly then proceeds
 // if second detects, then shortly after first detects, 
 // motor stop at first, then proceeds slowly until second, then stops a litle longer, then proceeds
-
+bool motorStarted = false;
 void loop() {
+  mqttControl::mqttLoop();
 
-  if (switchControl::switchValue(1)){
-    Serial.println("m1 run");
-    motorControl::motorRun(1, "clockwise", 10, 50);
-    delay(5000);
-    Serial.println("m1 stop");
-    motorControl::motorStop(1, 0, 10, 50);
-    delay(1000);
-
-
-    //motorControl::motorRun(2, "counterclockwise", 10, 168);
-    /*if (switchControl::switchValue(3))
-      motorControl::motorRun(2, "counterclockwise", 0, 168);*/
-
-  }
+/*
+  if (!motorStarted) {
+    motorControl::motorRun(2, "clockwise", 10, 255);
+    motorStarted = true;
+  }*/
 
 
 

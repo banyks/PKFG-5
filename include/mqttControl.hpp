@@ -8,5 +8,6 @@ class   mqttControl{
         static bool mqttConnect();
         static void mqttMessageReceave();
         static void mqttMessageSend();
+        static void mqttLoop();
 
 };
