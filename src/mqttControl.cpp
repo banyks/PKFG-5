@@ -25,6 +25,7 @@ const char* TOPIC_SUB_MOTOR = "esp32/motorCommand";
 const char* TOPIC_SUB_MOTORMODE = "esp32/motorMode";
 const char* TOPIC_SUB_NOTAUS = "esp32/notaus";
 const char* TOPIC_SUB_SENSORSTATUS = "esp32/sensorStatus";
+const char* TOPIC_SUB_GENERAL = "esp32/generalCommand";
 
 const char* TOPIC_PUB_MOTOR = "esp32/status";
 
@@ -95,6 +96,7 @@ void mqttCallback(char* topic, byte* payload, unsigned int length) {
     
     Serial.println(message);
     
+    // Emergency stop
     if (strcmp(topic, TOPIC_SUB_NOTAUS) == 0) {
 
         if (strcmp(message, "1") == 0) {
@@ -110,7 +112,7 @@ void mqttCallback(char* topic, byte* payload, unsigned int length) {
         else {
             Serial.println("MQTTCONTROL: Received unknown command");
         }
-    }
+    } // Running mode
     else if (strcmp(topic, TOPIC_SUB_MOTORMODE) == 0) {
 
         if (strcmp(message, "HAND") == 0) {
@@ -124,7 +126,7 @@ void mqttCallback(char* topic, byte* payload, unsigned int length) {
         else {
             Serial.println("MQTTCONTROL: Received unknown command");
         }
-    }
+    } // Motor control
     else if (strcmp(topic, TOPIC_SUB_MOTOR) == 0) {
 
         // Motor in 'Handbetrieb' run
@@ -180,6 +182,7 @@ bool mqttControl::mqttConnect() {
             bool sub2 = MQTT_CLIENT.subscribe(TOPIC_SUB_MOTORMODE);
             bool sub3 = MQTT_CLIENT.subscribe(TOPIC_SUB_NOTAUS);
             bool sub4 = MQTT_CLIENT.subscribe(TOPIC_SUB_SENSORSTATUS);
+            bool sub5 = MQTT_CLIENT.subscribe(TOPIC_SUB_GENERAL);
             
             Serial.print("MQTTCONTROL: Subscriptions - motorCommand: ");
             Serial.print(sub1 ? "OK" : "FAIL");
@@ -188,8 +191,10 @@ bool mqttControl::mqttConnect() {
             Serial.print(", notaus: ");
             Serial.print(sub3 ? "OK" : "FAIL");
             Serial.print(", sensorStatus: ");
-            Serial.println(sub3 ? "OK" : "FAIL");
-            
+            Serial.print(sub4 ? "OK" : "FAIL");
+            Serial.print(", sensorStatus: ");
+            Serial.println(sub5 ? "OK" : "FAIL");
+
             return true;
         } else {
             Serial.print("MQTTCONTROL: Connection failed, MQTT state: ");
