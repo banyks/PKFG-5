@@ -4,8 +4,8 @@
 
 // wifi connection (test)
 WiFiClient ESP_CLIENT;
-const char* WIFI_SSID = "FRITZ!Box 7530 DW_EXT";
-const char* WIFI_PASSWORD = "76089546061926253871";   
+const char* WIFI_SSID = /*"FRITZ!Box 7530 DW_EXT"*/"Alt_F4";
+const char* WIFI_PASSWORD = /*"76089546061926253871"*/"cplusplus";   
 const char* WIFI_HOSTNAME = "ESP32_GRUPPE5";
 // wifi connection
 IPAddress local_IP(192, 168, 8, 192);
@@ -21,81 +21,133 @@ const char* MQTT_USER = "";
 const char* MQTT_PASSWORD = "";
 
 // Topics
-const char* TOPIC_SUB = "esp32/commands";       // Subscribed topic (Node-RED → ESP32)
-const char* TOPIC_PUB = "esp32/status";         // Published topic (ESP32 → Node-RED)
+const char* TOPIC_SUB_MOTOR = "esp32/motorCommand";
+const char* TOPIC_SUB_MOTORMODE = "esp32/motorMode";
+const char* TOPIC_SUB_NOTAUS = "esp32/notaus";
+const char* TOPIC_SUB_SENSORSTATUS = "esp32/sensorStatus";
 
-bool mqttControl::wifiConnect(){
+const char* TOPIC_PUB_MOTOR = "esp32/status";
+
+// Variables
+bool mqttControl::emergencyStop = false;
+bool mqttControl::manualMode = false;
+bool mqttControl::motor3run = false;
+bool mqttControl::motor4run = false;
+
+bool mqttControl::wifiConnect() {
     WiFi.mode(WIFI_STA);
     WiFi.setHostname(WIFI_HOSTNAME);
-    
-    /* First try with static IP
-    if (!WiFi.config(local_IP, gateway, subnet)){
-        Serial.println("STA Failed to configure");
-        // Continue anyway with DHCP
-    }*/
 
-    Serial.println("MQTTCONTROL: Attempting wifi connection..");
-    WiFi.begin(WIFI_SSID, WIFI_PASSWORD);
+    bool connected = false;
 
-    // Wait for connection with timeout
-    unsigned long startTime = millis();
-    while (WiFi.status() != WL_CONNECTED && millis() - startTime < 10000) {
-        delay(500);
-        Serial.print(".");
-    }
+    do {
+        Serial.println("MQTTCONTROL: Attempting wifi connection..");
+        WiFi.begin(WIFI_SSID, WIFI_PASSWORD);
 
-    if (WiFi.status() == WL_CONNECTED){
-        Serial.println("MQTTCONTROL: Wifi connection -> succeeded");
-        Serial.print("MQTTCONTROL: IP -> ");
-        Serial.println(WiFi.localIP());
-        return 1;
-    }
-    
-    // Handle specific error cases
-    switch(WiFi.status()) {
-        case WL_CONNECT_FAILED:
-            Serial.println("MQTTCONTROL: Wifi connection -> failed");
-            break;
-        case WL_NO_SSID_AVAIL:
-            Serial.println("MQTTCONTROL: Wifi connection -> SSID not available");
-            break;
-        case WL_CONNECTION_LOST:
-            Serial.println("MQTTCONTROL: Wifi connection -> connection lost");
-            break;
-        case WL_DISCONNECTED:
-            Serial.println("MQTTCONTROL: Wifi connection -> disconnected");
-            break;
-        default:
-            Serial.print("MQTTCONTROL: Unknown wifi connection error: ");
-            Serial.println(WiFi.status());
-    }
-    
-    delay(1000);
-    return 0;
+        unsigned long startTime = millis();
+        while (WiFi.status() != WL_CONNECTED && millis() - startTime < 10000) {
+            delay(500);
+            Serial.print(".");
+        }
+        Serial.println();
+
+        if (WiFi.status() == WL_CONNECTED) {
+            Serial.println("MQTTCONTROL: Wifi connection -> succeeded");
+            Serial.print("MQTTCONTROL: IP -> ");
+            Serial.println(WiFi.localIP());
+            connected = true;
+        } else {
+            switch (WiFi.status()) {
+                case WL_CONNECT_FAILED:
+                    Serial.println("MQTTCONTROL: Wifi connection -> failed");
+                    break;
+                case WL_NO_SSID_AVAIL:
+                    Serial.println("MQTTCONTROL: Wifi connection -> SSID not available");
+                    break;
+                case WL_CONNECTION_LOST:
+                    Serial.println("MQTTCONTROL: Wifi connection -> connection lost");
+                    break;
+                case WL_DISCONNECTED:
+                    Serial.println("MQTTCONTROL: Wifi connection -> disconnected");
+                    break;
+                default:
+                    Serial.print("MQTTCONTROL: Unknown wifi connection error: ");
+                    Serial.println(WiFi.status());
+            }
+
+            Serial.println("MQTTCONTROL: Retrying in 60 seconds...");
+            delay(60000);
+        }
+
+    } while (!connected);
+
+    return true;
 }
 
 void mqttCallback(char* topic, byte* payload, unsigned int length) {
-    Serial.print("MQTTCONTROL: Message arrived [");
+    Serial.print("MQTTCONTROL: Message arrived (from: ");
     Serial.print(topic);
-    Serial.print("]: ");
+    Serial.print("): ");
     
-    // Create a buffer for the payload and null-terminate it
     char message[length + 1];
     memcpy(message, payload, length);
     message[length] = '\0';
     
     Serial.println(message);
     
-    // Here you can add logic to handle different commands
-    if (strcmp(topic, TOPIC_SUB) == 0) {
-        // Process commands for the ESP32
-        if (strcmp(message, "ON") == 0) {
-            Serial.println("MQTTCONTROL: Received ON command");
-            // Add your ON action here
-        } 
-        else if (strcmp(message, "OFF") == 0) {
-            Serial.println("MQTTCONTROL: Received OFF command");
-            // Add your OFF action here
+    if (strcmp(topic, TOPIC_SUB_NOTAUS) == 0) {
+
+        if (strcmp(message, "1") == 0) {
+            Serial.println("MQTTCONTROL: EMERGENCY STOP activated");
+            mqttControl::emergencyStop = 0;
+            mqttControl::motor3run = 0;
+            mqttControl::motor4run = 0;
+        }
+        else if (strcmp(message, "0") == 0) {
+            Serial.println("MQTTCONTROL: EMERGENCY STOP deactivated");
+            mqttControl::emergencyStop = 1;
+        }
+        else {
+            Serial.println("MQTTCONTROL: Received unknown command");
+        }
+    }
+    else if (strcmp(topic, TOPIC_SUB_MOTORMODE) == 0) {
+
+        if (strcmp(message, "HAND") == 0) {
+            Serial.println("MQTTCONTROL: Motors running mode: MANUAL");
+            mqttControl::manualMode = true;
+        }
+        else if (strcmp(message, "AUTO") == 0) {
+            Serial.println("MQTTCONTROL: Motors running mode: AUTOMATIC");
+            mqttControl::manualMode = false;
+        }
+        else {
+            Serial.println("MQTTCONTROL: Received unknown command");
+        }
+    }
+    else if (strcmp(topic, TOPIC_SUB_MOTOR) == 0) {
+
+        // Motor in 'Handbetrieb' run
+        if (strcmp(message, "M3-RN") == 0) {
+            Serial.println("MQTTCONTROL: Motor 3 run");
+            mqttControl::motor3run = 1;
+
+        }
+        else if (strcmp(message, "M4-RN") == 0) {
+            Serial.println("MQTTCONTROL: Motor 4 run");
+            mqttControl::motor4run = 1;
+
+        }
+        // Motor in 'Handbetrieb' stop
+        else if (strcmp(message, "M3-SP") == 0) {
+            Serial.println("MQTTCONTROL: Motor 3 stop");
+            mqttControl::motor3run = 0;
+
+        }
+        else if (strcmp(message, "M4-SP") == 0) {
+            Serial.println("MQTTCONTROL: Motor 4 stop");
+            mqttControl::motor4run = 0;
+
         }
         else {
             Serial.println("MQTTCONTROL: Received unknown command");
@@ -121,14 +173,23 @@ bool mqttControl::mqttConnect() {
         String clientId = "ESP32-" + String(random(0xFFFF), HEX);
 
         if (MQTT_CLIENT.connect(clientId.c_str(), MQTT_USER, MQTT_PASSWORD)) {
-            Serial.println("MQTTCONTROL: Connected to MQTT broker.");
-            // Subscribe to your desired topic
-            if (MQTT_CLIENT.subscribe(TOPIC_SUB)) {
-                Serial.print("MQTTCONTROL: Subscribed to topic -> ");
-                Serial.println(TOPIC_SUB);
-            } else {
-                Serial.println("MQTTCONTROL: Subscription failed!");
-            }
+            Serial.println("MQTTCONTROL: Connected to broker");
+            
+            // Subscribe to BOTH topics
+            bool sub1 = MQTT_CLIENT.subscribe(TOPIC_SUB_MOTOR);
+            bool sub2 = MQTT_CLIENT.subscribe(TOPIC_SUB_MOTORMODE);
+            bool sub3 = MQTT_CLIENT.subscribe(TOPIC_SUB_NOTAUS);
+            bool sub4 = MQTT_CLIENT.subscribe(TOPIC_SUB_SENSORSTATUS);
+            
+            Serial.print("MQTTCONTROL: Subscriptions - motorCommand: ");
+            Serial.print(sub1 ? "OK" : "FAIL");
+            Serial.print(", motorMode: ");
+            Serial.print(sub2 ? "OK" : "FAIL");
+            Serial.print(", notaus: ");
+            Serial.print(sub3 ? "OK" : "FAIL");
+            Serial.print(", sensorStatus: ");
+            Serial.println(sub3 ? "OK" : "FAIL");
+            
             return true;
         } else {
             Serial.print("MQTTCONTROL: Connection failed, MQTT state: ");
@@ -148,6 +209,7 @@ bool mqttControl::mqttConnect() {
 
     return false;  // fallback if loop is somehow skipped
 }
+
 void mqttControl::mqttMessageReceave(){
     // Keep empty if not implementing yet
 }

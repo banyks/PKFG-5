@@ -116,7 +116,7 @@ void motorControl::motorRun(int motor, const char* direction, unsigned int pwmSp
 }
 
 bool motorControl::motorStop(int motor, bool err, unsigned int pwmSpeed, unsigned int motorSpeed){
-    if (err && motor == 3){
+    if (err && motor == 0){
         digitalWrite(motorControl::MOTOR1_IN1, 0);
         digitalWrite(motorControl::MOTOR1_IN2, 0);
         digitalWrite(motorControl::MOTOR2_IN3, 0);

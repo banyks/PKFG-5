@@ -52,16 +52,30 @@ void setup() {
 // if fist detected alone, motor stops shortly then proceeds
 // if second detects, then shortly after first detects, 
 // motor stop at first, then proceeds slowly until second, then stops a litle longer, then proceeds
-bool motorStarted = false;
+bool motorStatus = false;
 void loop() {
   mqttControl::mqttLoop();
 
-/*
-  if (!motorStarted) {
-    motorControl::motorRun(2, "clockwise", 10, 255);
-    motorStarted = true;
-  }*/
+  // Manual control of motor 3 and 4
+  if (!motorStatus && mqttControl::manualMode && mqttControl::motor3run && mqttControl::emergencyStop) {
+    motorControl::motorRun(2, "clockwise", 10, 220);
+    motorStatus = true;
+    Serial.println("Motor 3 started");
+  }
+  else if (motorStatus && mqttControl::manualMode && !mqttControl::motor3run && mqttControl::emergencyStop) {
+    motorControl::motorStop(2, 0, 10, 220);
+    motorStatus = false;
+    Serial.println("Motor 3 stopped");
+  }
+  else if(motorStatus && !mqttControl::emergencyStop){
+    motorControl::motorStop(0, 1, 0, 0);
+    motorStatus = false;
+    Serial.println("Motors stopped");
 
+  }
 
+  // Automatic control of motor 3 and 4
+
+  
 
 }
