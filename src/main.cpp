@@ -39,13 +39,12 @@ void setup() {
   motorControl::motorSetup();
   ledControl::ledSetup();
   switchControl::switchSetup();
-  mqttControl::wifiConnect();
-  mqttControl::mqttConnect();
+
 
   delay(100);
 
-  //displayControl::displayStartup();
-  //displayControl::displayLoadUpConnections();
+  displayControl::displayStartup();
+  displayControl::displayLoadUpConnections();
 
 }
 // if the second sensor detected, motor continues normally
@@ -57,16 +56,61 @@ void loop() {
   mqttControl::mqttLoop();
 
   // Manual control of motor 3 and 4
-  if (!motorStatus && mqttControl::manualMode && mqttControl::motor3run && mqttControl::emergencyStop) {
-    motorControl::motorRun(2, "clockwise", 10, 220);
+  if (!motorStatus && mqttControl::manualMode && mqttControl::motor3cw && mqttControl::emergencyStop) {
+    if (mqttControl::motor3Speed == 0) {
+      motorControl::motorRun(1, "clockwise", 10, mqttControl::motor3Speed);
+    } else {
+      motorControl::motorRun(1, "clockwise", 10, 220);
+    }
     motorStatus = true;
-    Serial.println("Motor 3 started");
+    Serial.println("Motor 3 cw");
   }
-  else if (motorStatus && mqttControl::manualMode && !mqttControl::motor3run && mqttControl::emergencyStop) {
-    motorControl::motorStop(2, 0, 10, 220);
+  else if (motorStatus && mqttControl::manualMode && !mqttControl::motor4cw && mqttControl::emergencyStop) {
+    if (mqttControl::motor4Speed == 0) {
+      motorControl::motorRun(2, "clockwise", 10, mqttControl::motor4Speed);
+    } else {
+      motorControl::motorRun(2, "clockwise", 10, 220);
+    }
+    motorStatus = true;
+    Serial.println("Motor 4 cw");
+  }
+  else if (!motorStatus && mqttControl::manualMode && mqttControl::motor3ccw && mqttControl::emergencyStop) {
+    if (mqttControl::motor3Speed == 0) {
+      motorControl::motorRun(1, "counterclockwise", 10, mqttControl::motor3Speed);
+    } else {
+      motorControl::motorRun(1, "counterclockwise", 10, 220);
+    }
+    motorStatus = true;
+    Serial.println("Motor 3 ccw");
+  }
+  else if (motorStatus && mqttControl::manualMode && mqttControl::motor4ccw && mqttControl::emergencyStop) {
+    if (mqttControl::motor4Speed == 0) {
+      motorControl::motorRun(2, "counterclockwise", 10, mqttControl::motor4Speed);
+    } else {
+      motorControl::motorRun(2, "counterclockwise", 10, 220);
+    }
+
+    motorStatus = true;
+    Serial.println("Motor 4 ccw");
+  } // Motor stop
+  else if (motorStatus && mqttControl::manualMode && !mqttControl::motor3ccw && !mqttControl::motor3cw  && mqttControl::emergencyStop) {
+    if (mqttControl::motor3Speed == 0) {
+      motorControl::motorStop(1, 0, 10, mqttControl::motor3Speed);
+    } else {
+      motorControl::motorStop(1, 0, 10, 220);
+    }
     motorStatus = false;
     Serial.println("Motor 3 stopped");
   }
+  else if (motorStatus && mqttControl::manualMode && !mqttControl::motor4ccw && !mqttControl::motor4cw && mqttControl::emergencyStop) {
+    if (mqttControl::motor4Speed == 0) {
+      motorControl::motorStop(2, 0, 10, mqttControl::motor4Speed);
+    } else {
+      motorControl::motorStop(2, 0, 10, 220);
+    }
+    motorStatus = false;
+    Serial.println("Motor 3 stopped");
+  } // Motor emergency stop
   else if(motorStatus && !mqttControl::emergencyStop){
     motorControl::motorStop(0, 1, 0, 0);
     motorStatus = false;
@@ -75,7 +119,12 @@ void loop() {
   }
 
   // Automatic control of motor 3 and 4
+  if (!mqttControl::manualMode && mqttControl::emergencyStop){
+    motorControl::motorRun(1, "clockwise", 10, 180);
+    delay(1000);
+    motorControl::motorRun(2, "clockwise", 10, 180);
 
-  
+
+  }
 
 }

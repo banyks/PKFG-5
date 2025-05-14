@@ -22,6 +22,8 @@ const char* MQTT_PASSWORD = "";
 
 // Topics
 const char* TOPIC_SUB_MOTOR = "esp32/motorCommand";
+const char* TOPIC_SUB_MOTOR_SPEED1 = "esp32/motor3Speed";
+const char* TOPIC_SUB_MOTOR_SPEED2 = "esp32/motor4Speed";
 const char* TOPIC_SUB_MOTORMODE = "esp32/motorMode";
 const char* TOPIC_SUB_NOTAUS = "esp32/notaus";
 const char* TOPIC_SUB_SENSORSTATUS = "esp32/sensorStatus";
@@ -32,8 +34,12 @@ const char* TOPIC_PUB_MOTOR = "esp32/status";
 // Variables
 bool mqttControl::emergencyStop = false;
 bool mqttControl::manualMode = false;
-bool mqttControl::motor3run = false;
-bool mqttControl::motor4run = false;
+bool mqttControl::motor3ccw = false;
+bool mqttControl::motor3cw = false;
+int mqttControl::motor3Speed = 0;
+bool mqttControl::motor4ccw = false;
+bool mqttControl::motor4cw = false;
+int mqttControl::motor4Speed = 0;
 
 bool mqttControl::wifiConnect() {
     WiFi.mode(WIFI_STA);
@@ -102,8 +108,10 @@ void mqttCallback(char* topic, byte* payload, unsigned int length) {
         if (strcmp(message, "1") == 0) {
             Serial.println("MQTTCONTROL: EMERGENCY STOP activated");
             mqttControl::emergencyStop = 0;
-            mqttControl::motor3run = 0;
-            mqttControl::motor4run = 0;
+            mqttControl::motor3ccw = 0;
+            mqttControl::motor3cw = 0;
+            mqttControl::motor4ccw = 0;
+            mqttControl::motor4cw = 0;
         }
         else if (strcmp(message, "0") == 0) {
             Serial.println("MQTTCONTROL: EMERGENCY STOP deactivated");
@@ -129,31 +137,49 @@ void mqttCallback(char* topic, byte* payload, unsigned int length) {
     } // Motor control
     else if (strcmp(topic, TOPIC_SUB_MOTOR) == 0) {
 
-        // Motor in 'Handbetrieb' run
-        if (strcmp(message, "M3-RN") == 0) {
-            Serial.println("MQTTCONTROL: Motor 3 run");
-            mqttControl::motor3run = 1;
+        // Motor in 'Handbetrieb' ccw
+        if (strcmp(message, "M3-LL") == 0) {
+            Serial.println("MQTTCONTROL: Motor 3 ccw");
+            mqttControl::motor3ccw = 1;
 
         }
-        else if (strcmp(message, "M4-RN") == 0) {
-            Serial.println("MQTTCONTROL: Motor 4 run");
-            mqttControl::motor4run = 1;
+        else if (strcmp(message, "M4-LL") == 0) {
+            Serial.println("MQTTCONTROL: Motor 4 ccw");
+            mqttControl::motor4ccw = 1;
 
         }
-        // Motor in 'Handbetrieb' stop
-        else if (strcmp(message, "M3-SP") == 0) {
-            Serial.println("MQTTCONTROL: Motor 3 stop");
-            mqttControl::motor3run = 0;
+        // Motor in 'Handbetrieb' cw
+        else if (strcmp(message, "M3-RL") == 0) {
+            Serial.println("MQTTCONTROL: Motor 3 cw");
+            mqttControl::motor3cw = 0;
 
         }
-        else if (strcmp(message, "M4-SP") == 0) {
-            Serial.println("MQTTCONTROL: Motor 4 stop");
-            mqttControl::motor4run = 0;
+        else if (strcmp(message, "M4-RL") == 0) {
+            Serial.println("MQTTCONTROL: Motor 4 cw");
+            mqttControl::motor4cw = 0;
 
         }
         else {
             Serial.println("MQTTCONTROL: Received unknown command");
         }
+    }
+    else if(strcmp(topic, TOPIC_SUB_MOTOR_SPEED1) == 0){
+        mqttControl::motor3Speed = atoi(message);
+        Serial.print("MQTTCONTROL: Motor 3 speed: ");
+        Serial.println(mqttControl::motor3Speed);
+
+    }
+    else if(strcmp(topic, TOPIC_SUB_MOTOR_SPEED2) == 0){
+        mqttControl::motor4Speed = atoi(message);
+        Serial.print("MQTTCONTROL: Motor 4 speed: ");
+        Serial.println(mqttControl::motor4Speed);
+    
+    }
+    else {
+
+        Serial.println("MQTTCONTROL: ?");
+
+
     }
 }
 
@@ -182,7 +208,9 @@ bool mqttControl::mqttConnect() {
             bool sub2 = MQTT_CLIENT.subscribe(TOPIC_SUB_MOTORMODE);
             bool sub3 = MQTT_CLIENT.subscribe(TOPIC_SUB_NOTAUS);
             bool sub4 = MQTT_CLIENT.subscribe(TOPIC_SUB_SENSORSTATUS);
-            bool sub5 = MQTT_CLIENT.subscribe(TOPIC_SUB_GENERAL);
+            bool sub5 = MQTT_CLIENT.subscribe(TOPIC_SUB_GENERAL); 
+            bool sub6 = MQTT_CLIENT.subscribe(TOPIC_SUB_MOTOR_SPEED1); 
+            bool sub7 = MQTT_CLIENT.subscribe(TOPIC_SUB_MOTOR_SPEED2); 
             
             Serial.print("MQTTCONTROL: Subscriptions - motorCommand: ");
             Serial.print(sub1 ? "OK" : "FAIL");
@@ -192,8 +220,12 @@ bool mqttControl::mqttConnect() {
             Serial.print(sub3 ? "OK" : "FAIL");
             Serial.print(", sensorStatus: ");
             Serial.print(sub4 ? "OK" : "FAIL");
-            Serial.print(", sensorStatus: ");
-            Serial.println(sub5 ? "OK" : "FAIL");
+            Serial.print(", general: ");
+            Serial.print(sub5 ? "OK" : "FAIL");
+            Serial.print(", motor3Speed: ");
+            Serial.println(sub6 ? "OK" : "FAIL");
+            Serial.print(", motor4Speed: ");
+            Serial.println(sub7 ? "OK" : "FAIL");
 
             return true;
         } else {
@@ -213,14 +245,6 @@ bool mqttControl::mqttConnect() {
     }
 
     return false;  // fallback if loop is somehow skipped
-}
-
-void mqttControl::mqttMessageReceave(){
-    // Keep empty if not implementing yet
-}
-
-void mqttControl::mqttMessageSend(){
-    // Keep empty if not implementing yet
 }
 
 void mqttControl::mqttLoop() {MQTT_CLIENT.loop();}

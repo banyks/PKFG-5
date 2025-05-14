@@ -87,7 +87,7 @@ void displayControl::displayLoadUpConnections(){
     delay(1000);
 
     displayControl::displayText("WIFI connectieren");
-    if (true/*mqttControl::wifiConnect()*/){            //----------------- TO REMOVE (comment and true) -----------------
+    if (mqttControl::wifiConnect()){
         displayControl::displayText("WIFI connectiert..");
         delay(1000);
     }
@@ -100,7 +100,7 @@ void displayControl::displayLoadUpConnections(){
     
 
     displayControl::displayText("MQTT connectieren");
-    if (true/*mqttControl::mqttConnect()*/){            //----------------- TO REMOVE (comment and true) -----------------
+    if (mqttControl::mqttConnect()){
         displayControl::displayText("MQTT connectiert..");
         delay(1000);
     }
