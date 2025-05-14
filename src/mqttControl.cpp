@@ -15,7 +15,7 @@ IPAddress subnet(255, 255, 0, 0);
 
 // mqtt connection
 PubSubClient MQTT_CLIENT(ESP_CLIENT);
-const char* MQTT_SERVER = "192.168.178.71";
+const char* MQTT_SERVER = "192.168.178.107";
 const int MQTT_PORT = 1883;
 const char* MQTT_USER = "";
 const char* MQTT_PASSWORD = "";
@@ -40,6 +40,9 @@ int mqttControl::motor3Speed = 0;
 bool mqttControl::motor4ccw = false;
 bool mqttControl::motor4cw = false;
 int mqttControl::motor4Speed = 0;
+bool mqttControl::goodQuality = false;
+bool mqttControl::badQuality = false;
+
 
 bool mqttControl::wifiConnect() {
     WiFi.mode(WIFI_STA);
@@ -103,9 +106,9 @@ void mqttCallback(char* topic, byte* payload, unsigned int length) {
     Serial.println(message);
     
     // Emergency stop
-    if (strcmp(topic, TOPIC_SUB_NOTAUS) == 0) {
+    if (strcmp(topic, TOPIC_SUB_NOTAUS) == 0 || strcmp(topic, TOPIC_SUB_GENERAL) == 0) {
 
-        if (strcmp(message, "1") == 0) {
+        if (strcmp(message, "1") == 0 || strcmp(message, "NA") == 0) {
             Serial.println("MQTTCONTROL: EMERGENCY STOP activated");
             mqttControl::emergencyStop = 0;
             mqttControl::motor3ccw = 0;
@@ -113,7 +116,7 @@ void mqttCallback(char* topic, byte* payload, unsigned int length) {
             mqttControl::motor4ccw = 0;
             mqttControl::motor4cw = 0;
         }
-        else if (strcmp(message, "0") == 0) {
+        else if (strcmp(message, "0") == 0 || strcmp(message, "NA-") == 0) {
             Serial.println("MQTTCONTROL: EMERGENCY STOP deactivated");
             mqttControl::emergencyStop = 1;
         }
@@ -121,13 +124,13 @@ void mqttCallback(char* topic, byte* payload, unsigned int length) {
             Serial.println("MQTTCONTROL: Received unknown command");
         }
     } // Running mode
-    else if (strcmp(topic, TOPIC_SUB_MOTORMODE) == 0) {
+    else if (strcmp(topic, TOPIC_SUB_MOTORMODE) == 0 || strcmp(topic, TOPIC_SUB_GENERAL) == 0 && strcmp(message, "MODE") == 0) {
 
-        if (strcmp(message, "HAND") == 0) {
+        if (strcmp(message, "HAND") == 0 || strcmp(message, "HND") == 0) {
             Serial.println("MQTTCONTROL: Motors running mode: MANUAL");
             mqttControl::manualMode = true;
         }
-        else if (strcmp(message, "AUTO") == 0) {
+        else if (strcmp(message, "AUTO") == 0 || strcmp(message, "ATO") == 0) {
             Serial.println("MQTTCONTROL: Motors running mode: AUTOMATIC");
             mqttControl::manualMode = false;
         }
@@ -174,6 +177,24 @@ void mqttCallback(char* topic, byte* payload, unsigned int length) {
         Serial.print("MQTTCONTROL: Motor 4 speed: ");
         Serial.println(mqttControl::motor4Speed);
     
+    }
+    else if(strcmp(topic, TOPIC_SUB_SENSORSTATUS) == 0){
+        if(strcmp(message, "Q-GUT") == 0){
+            mqttControl::goodQuality = true;
+            Serial.println("MQTTCONTROL: Sensor status: good quality");
+        }
+        else if(strcmp(message, "Q-SCHT") == 0){
+            mqttControl::badQuality = true;
+            Serial.println("MQTTCONTROL: Sensor status: bad quality");
+        }
+        else{
+            Serial.println("MQTTCONTROL: Received unknown command");
+        }
+    
+    }
+    else if(strcmp(topic, TOPIC_SUB_GENERAL) == 0){
+
+
     }
     else {
 

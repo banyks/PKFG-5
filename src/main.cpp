@@ -45,14 +45,11 @@ void setup() {
 
   displayControl::displayStartup();
   displayControl::displayLoadUpConnections();
-
 }
-// if the second sensor detected, motor continues normally
-// if fist detected alone, motor stops shortly then proceeds
-// if second detects, then shortly after first detects, 
-// motor stop at first, then proceeds slowly until second, then stops a litle longer, then proceeds
+
 bool motorStatus = false;
-void loop() {
+
+void loop(){
   mqttControl::mqttLoop();
 
   // Manual control of motor 3 and 4
@@ -120,9 +117,19 @@ void loop() {
 
   // Automatic control of motor 3 and 4
   if (!mqttControl::manualMode && mqttControl::emergencyStop){
-    motorControl::motorRun(1, "clockwise", 10, 180);
-    delay(1000);
-    motorControl::motorRun(2, "clockwise", 10, 180);
+    if (mqttControl::goodQuality && !mqttControl::badQuality){
+      ledControl::ledOn("green", 0);
+      motorControl::motorRun(1, "clockwise", 10, 220);
+      motorControl::motorRun(2, "clockwise", 10, 200);
+
+    }
+    if (mqttControl::badQuality){
+      ledControl::ledOn("red", 0);
+      motorControl::motorRun(1, "clockwise", 10, 250);
+      motorControl::motorStop(2, 0, 10, 200);
+      delay(1000);
+      motorControl::motorRun(2, "clockwise", 10, 180);
+    }
 
 
   }
