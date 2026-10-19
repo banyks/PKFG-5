@@ -4,8 +4,8 @@
 
 // wifi connection (test)
 WiFiClient ESP_CLIENT;
-const char* WIFI_SSID = /*"FRITZ!Box 7530 DW_EXT"*/"Alt_F4";
-const char* WIFI_PASSWORD = /*"76089546061926253871"*/"cplusplus";   
+const char* WIFI_SSID = /*"---"*/"---";
+const char* WIFI_PASSWORD = /*"---"*/"---";   
 const char* WIFI_HOSTNAME = "ESP32_GRUPPE5";
 // wifi connection
 IPAddress local_IP(192, 168, 8, 192);
